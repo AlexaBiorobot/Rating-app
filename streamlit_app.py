@@ -1,4 +1,6 @@
 import streamlit as st
+st.write("🔑 Available secret keys:", list(st.secrets.keys()))
+st.stop()
 import pandas as pd
 from st_aggrid import GridOptionsBuilder, AgGrid
 import gspread
