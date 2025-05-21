@@ -1,4 +1,7 @@
 import streamlit as st
+st.write("== ALL SECRETS ==")
+st.write(st.secrets)
+st.stop()
 import pandas as pd
 from st_aggrid import GridOptionsBuilder, AgGrid
 import gspread
