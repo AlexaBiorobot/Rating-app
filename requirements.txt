@@ -1,117 +1,16 @@
-import os
-import json
-import streamlit as st
-import pandas as pd
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-from st_aggrid import GridOptionsBuilder, AgGrid
+Streamlit framework
 
-Page configuration
+streamlit
 
-st.set_page_config(
-page_title="Live Google Sheet Table",
-layout="wide",
-initial_sidebar_state="expanded"
-)
+Data manipulation
 
-st.title("Google Sheet Table with Authorization and Filters")
+pandas
 
-Google Sheet identifiers
+Google Sheets API
 
-SHEET_ID = st.secrets.get("MAIN_SS_ID", "1xqGCXsebSmYL4bqAwvTmD9lOentI45CTMxhea-ZDFls")
-GID = 1731969866  # gid of the sheet tab
-
-Scopes for gspread
-
-SCOPES = [
-"https://spreadsheets.google.com/feeds",
-"https://www.googleapis.com/auth/drive.readonly"
-]
-
-@st.cache_resource
-def get_gspread_client():
-"""Authorize with service account and return gspread client"""
-# Read JSON from environment or secrets
-sa_json = os.getenv("GCP_SERVICE_ACCOUNT") or st.secrets.get("GCP_SERVICE_ACCOUNT")
-if not sa_json:
-st.error("Сервисный аккаунт не найден. Добавьте GCP_SERVICE_ACCOUNT в secrets.")
-st.stop()
-try:
-sa_info = json.loads(sa_json)
-except json.JSONDecodeError as e:
-st.error(f"Ошибка разбора JSON сервисного аккаунта: {e}")
-st.stop()
-creds = ServiceAccountCredentials.from_json_keyfile_dict(sa_info, SCOPES)
-return gspread.authorize(creds)
-
-@st.cache_data(ttl=600)
-def load_data():
-"""Load data from authorized Google Sheet"""
-client = get_gspread_client()
-# Open sheet and worksheet by gid
-sheet = client.open_by_key(SHEET_ID).get_worksheet_by_id(GID)
-records = sheet.get_all_records()
-df = pd.DataFrame(records)
-return df
-
-Load and preprocess
-
-df = load_data()
-
-Filter rows where column 'C' == 'active'
-
-if 'C' in df.columns:
-df = df[df['C'].astype(str).str.lower() == 'active']
-else:
-st.warning("Колонка 'C' не найдена в таблице.")
-
-Select only needed columns A, B, P, Q, V
-
-cols = [c for c in ['A','B','P','Q','V'] if c in df.columns]
-if not cols:
-st.error("Ни одна из колонок A, B, P, Q, V не найдена.")
-st.stop()
-df = df[cols]
-
-Sidebar: optional filters on any column
-
-st.sidebar.header("Фильтры")
-filters = {}
-for col in cols:
-values = sorted(df[col].dropna().unique())
-sel = st.sidebar.multiselect(f"{col}", values, default=None)
-if sel:
-filters[col] = sel
-
-Apply filters
-
-dff = df.copy()
-for col, sel in filters.items():
-dff = dff[dff[col].isin(sel)]
-
-Build AgGrid options
-
-gb = GridOptionsBuilder.from_dataframe(dff)
-gb.configure_default_column(filterable=True, sortable=True, resizable=True)
-grid_options = gb.build()
-
-Display table
-
-AgGrid(
-dff,
-gridOptions=grid_options,
-height=500,
-fit_columns_on_grid_load=True
-)
-
-st.write(f"Всего строк: {len(dff)}")
-
-Export button
-
-@st.cache_data
-def to_excel(df: pd.DataFrame):
-return df.to_excel(index=False)
-
-if st.button("Export to Excel"):
-xlsx = to_excel(dff)
-st.download_button("Download XLSX", xlsx, file_name="report.xlsx")
+gspread
+oauth2client
+# For Google authentication (if using google-auth instead of oauth2client)
+google-auth
+# Interactive data grid for Streamlit
+streamlit-aggrid
