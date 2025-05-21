@@ -1,16 +1,6 @@
-Streamlit framework
-
 streamlit
-
-Data manipulation
-
 pandas
-
-Google Sheets API
-
 gspread
 oauth2client
-# For Google authentication (if using google-auth instead of oauth2client)
 google-auth
-# Interactive data grid for Streamlit
 streamlit-aggrid
