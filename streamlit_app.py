@@ -1,6 +1,12 @@
 import streamlit as st
-st.write("== ALL SECRETS ==")
-st.write(st.secrets)
+# Получаем словарь сервиса
+info = get_service_account_info()
+pk = info.get("private_key", "")
+
+st.write("=== DEBUG PRIVATE_KEY ===")
+st.write("Length:", len(pk))
+st.write("Starts with:", repr(pk[:30]))
+st.write("Ends with:", repr(pk[-30:]))
 st.stop()
 import pandas as pd
 from st_aggrid import GridOptionsBuilder, AgGrid
